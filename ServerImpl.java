@@ -49,7 +49,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
             //FORMA COMO GUARDAR: ID - DIA DA RESERVA - ALMOÇO/JANTAR
             for (int id = numeroDaLinha+1; id < listaReservas.size()+1 ; id++) {
                 if(verificaSeJaExiste(id)) {
-                    id=0;
+                   continue;
                 }
                 else{
                     write.append(String.valueOf(id)).append("@").append(dataMarcacao).append("@").append(escolhaRefeicao).append("\n");
