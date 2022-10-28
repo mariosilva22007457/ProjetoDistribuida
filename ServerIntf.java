@@ -3,7 +3,7 @@ import java.rmi.*;
 public interface ServerIntf extends Remote {
 
   void lerDados() throws Exception,RemoteException;
-  void saveDados() throws Exception,RemoteException;
+  void saveDados(String dataMarcacao, String escolhaRefeicao) throws Exception,RemoteException;
+  boolean verificaSeJaExiste(int input) throws RemoteException;
 
-  
 }
