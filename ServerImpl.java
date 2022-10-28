@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.rmi.*;
 import java.rmi.server.*;
+
 import java.util.ArrayList;
 
 public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
@@ -16,7 +17,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
         
 
         lerDados();
-        //DEBUG
+        //PARA DEBUG
         for (int i = 0; i < listaReservas.size(); i++) {
             System.out.println(listaReservas.get(i));
         }
