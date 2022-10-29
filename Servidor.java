@@ -3,7 +3,7 @@ import java.rmi.*;
 
 public class Servidor
 {    
-    public static void main(String[] args) {
+    public static void main(String args[]) {
 
         try {
 

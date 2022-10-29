@@ -13,7 +13,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
     ArrayList<Reservas> listaReservas = new ArrayList<>();
    
     //VARIAVEIS GLOBAIS PARA EFEITO DE LOGS CORRETOS NO SERVIDOR 
-    public static int numeroDaLinha = 0;
+    public static int numeroDaLinha = 1;
 
     //Quando se liga o servidor
     public ServerImpl() throws RemoteException, Exception {
@@ -22,8 +22,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
 
         lerDados();
 
-        for (Reservas listaReserva : listaReservas) {
-            System.out.println(listaReserva);
+        for (int i = 0; i < listaReservas.size(); i++) {
+            System.out.println(listaReservas.get(i));
         }
 
         System.out.println("Server Ready");
@@ -34,9 +34,21 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
         //GUARDA DADOS NA BASE DE DADOS (Ficheiro TXT)
         try {  
 
+            //SABER QUANTAS LINHAS TEM O FILE
+            FileReader fr = new FileReader("BaseDeDados.txt");
+            BufferedReader reader = new BufferedReader(fr);
+    
+            String linha = null;
+            
+            while ((linha = reader.readLine()) != null) {
+                numeroDaLinha++;
+            }
+
+            reader.close();
+
             File file = new File("BaseDeDados.txt");
-            //Argumento TRUE para dar append no ficheiro e não apague registos antigos
-            FileWriter writer = new FileWriter(file);
+            //Argumento TRUE para que dê append no ficheiro e não apague registos antigos
+            FileWriter writer = new FileWriter(file,true);
             PrintWriter write = new PrintWriter(writer);
             
             int idParaLogServer = 0;
@@ -44,21 +56,30 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
             Reservas a = new Reservas(numeroDaLinha,dataMarcacao, escolhaRefeicao);
             listaReservas.add(a);
           
+            int id = numeroDaLinha;
+            write.println(id + "@" + dataMarcacao + "@" + escolhaRefeicao);
 
+            /* /
+            if(id == 1){
+                write.println(id + "@" + dataMarcacao + "@" + escolhaRefeicao);
+            }else{
+                write.println(id + "@" + dataMarcacao + "@" + escolhaRefeicao);
+            }
+            
             
             //FORMA COMO GUARDAR: ID - DIA DA RESERVA - ALMOÇO/JANTAR
+            /* 
             for (int id = numeroDaLinha+1; id < listaReservas.size()+1 ; id++) {
-                if(verificaSeJaExiste(id)) {
-                   continue;
-                }
-                else{
-                    write.append(String.valueOf(id)).append("@").append(dataMarcacao).append("@").append(escolhaRefeicao).append("\n");
+                if(verificaSeJaExiste(id)){
+                    continue;
+                }else{
+                    write.append(id + "@" + dataMarcacao + "@" + escolhaRefeicao + "\n");                
                     idParaLogServer = id;
                 }
 
                 
                 
-                /* 
+            
                 if(id < 1){
                     write.println(1 + "@" + dataMarcacao + "@" + escolhaRefeicao);
                     idParaLogServer = 1;
@@ -67,9 +88,9 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                     write.println(id + "@" + dataMarcacao + "@" + escolhaRefeicao);                
                     idParaLogServer = id;
                 }
-                */
+                
             }  
-            
+            */
  
             System.out.println("Nova Reserva registada no servidor/BD com ID = " + idParaLogServer);
 
@@ -89,11 +110,9 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
             FileReader fr = new FileReader("BaseDeDados.txt");
             BufferedReader reader = new BufferedReader(fr);
     
-            String linha;
+            String linha = null;
             
             while ((linha = reader.readLine()) != null) {
-
-                numeroDaLinha++;
     
                 String[] dados = linha.split("@");
 
@@ -116,35 +135,4 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
         }
     }
 
-    public boolean verificaSeJaExiste(int input) throws RemoteException {
-        try {   
-            
-            FileReader fr1 = new FileReader("BaseDeDados.txt");
-            BufferedReader reader1 = new BufferedReader(fr1);
-    
-            String linha;
-            
-            while ((linha = reader1.readLine()) != null) {
-            
-                String[] dados = linha.split("@");
-
-                int id = Integer.parseInt(dados[0]);
-            
-                if(id == input){
-                    return true;
-                }
-            }
-
-            reader1.close();
-
-         
-            return false;
-        } catch (Exception e){
-            System.out.println("Erro já existe");
-        }
-
-        return false;
-    }
-    
-    
 }

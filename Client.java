@@ -14,12 +14,12 @@ public class Client {
         System.out.println("=================================================");
     }
 
-    public static void main(String[] args) {
+    public static void main(String args[]) {
         
         try {
             String addServerURL = "rmi://" + args[0] + "/AddServer";
             ServerIntf addServerIntf = (ServerIntf)Naming.lookup(addServerURL);
-            int numeroInput;
+            int numeroInput = 0;
             Scanner input;
             
             do {
@@ -29,44 +29,30 @@ public class Client {
                 input = new Scanner(System.in);
                 numeroInput = input.nextInt();
 
-                if(numeroInput == 1) {
+                if(numeroInput == 1){
                     System.out.println("Proceda à reserva de mesa...\n");
-
+    
                     System.out.println("Introduza a data na qual deseja marcar mesa, do seguinte modo: DD/MM/YY\n");
                     input = new Scanner(System.in);
                     String data = input.nextLine();
-                    //do{
+                    
                     System.out.println("Vai desejar marcar mesa para jantar ou almoço? Responda de forma: A -> Almoço / J -> Jantar");
                     input = new Scanner(System.in);
                     String escolhaMarcacao = input.nextLine();
-                    if (escolhaMarcacao.equals("A")) {
-                        System.out.println("A sua reserva para almoçar foi marcada com sucesso!");
-                    } else if (escolhaMarcacao.equals("J")) {
-                        System.out.println("A sua reserva para jantar foi marcada com sucesso!");
-                    } else {
-                        System.out.println("Por favor selecione uma das opções corretas para reservar mesa.");
-                    }
-               // }while(!(escolhaMarcacao.equals("A")) || !(escolhaMarcacao.equals("J")))
-
-
-
+                    
+                    
+                    System.out.println("A sua reserva foi marcada com sucesso!");
     
                     addServerIntf.saveDados(data,escolhaMarcacao);
                     
                     
-                } else if (numeroInput == 2) {
-                    System.out.println();
-                } else if (numeroInput == 3) {
-                    System.out.println();
-                } else if (numeroInput == 4) {
-                    System.out.println();
-                } else{
+                }else{
                     System.exit(0);
                 }
                 
-            } while (true);
+            } while (numeroInput!=1 || numeroInput!=2 || numeroInput!=3 || numeroInput!=4);
 
-
+            input.close();
         }catch(Exception e) {
             System.out.println("Obrigado, volte sempre!");
         }
