@@ -8,7 +8,7 @@ public class Servidor
         try {
 
             ServerImpl ServerImpl = new ServerImpl();
-            Naming.rebind("AddServer", ServerImpl);
+            Naming.rebind("Server", ServerImpl);
 
         }catch(Exception e) {
 

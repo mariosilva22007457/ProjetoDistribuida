@@ -21,8 +21,8 @@ public class Client {
     public static void main(String args[]) {
         
         try {
-            String addServerURL = "rmi://" + args[0] + "/AddServer";
-            ServerIntf addServerIntf = (ServerIntf)Naming.lookup(addServerURL);
+            String ServerURL = "rmi://" + args[0] + "/Server";
+            ServerIntf ServerIntf = (ServerIntf)Naming.lookup(ServerURL);
             int numeroInput = 0;
             Scanner input;
             
@@ -50,9 +50,9 @@ public class Client {
                     int numeroDePessoas = input.nextInt();
 
                 
-                    addServerIntf.saveDados(data,escolhaMarcacao,numeroDePessoas);
+                    ServerIntf.saveDados(data,escolhaMarcacao,numeroDePessoas);
 
-                    if(addServerIntf.mesaCodeErro()){
+                    if(ServerIntf.mesaCodeErro()){
                         System.out.println("\nSem mesas disponiveis para pessoas na categoria escolhida por si!\nPedimos desculpa, tente inserir outra data válida\n");
                         continue;
                     }else{
