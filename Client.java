@@ -21,8 +21,11 @@ public class Client {
     public static void main(String args[]) {
         
         try {
+            
             String ServerURL = "rmi://" + args[0] + "/Server";
             ServerIntf ServerIntf = (ServerIntf)Naming.lookup(ServerURL);
+           
+           
             int numeroInput = 0;
             Scanner input;
             

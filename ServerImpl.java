@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.rmi.*;
 import java.rmi.server.*;
+import java.security.PublicKey;
 import java.util.ArrayList;
 
 
@@ -17,6 +18,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
     //VARIAVEIS GLOBAIS PARA EFEITO DE LOGS CORRETOS NO SERVIDOR 
     public static int idParaFile = 1;
     public static boolean erroMesas = false;
+    public static boolean servidorReiniciou = false;
 
     //Quando se liga o servidor
     public ServerImpl() throws RemoteException, Exception {
@@ -24,7 +26,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
         System.out.println("Server turning ON\nGetting Data...");
 
         lerDados();
-
+        servidorReiniciou = true;
         System.out.println("\n|DEBUG LISTA RESERVAS|");
         for (int i = 0; i < listaReservas.size(); i++) {
             System.out.println(listaReservas.get(i));
@@ -72,7 +74,20 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
             System.out.println("CHEGUEI 2");
             
             if(!mesaCodeErro()){
-                write.println(idParaFile + "@" + dataMarcacao + "@" + escolhaRefeicao + "@" + numeroDePessoas);
+
+                //QUANDO REINICIAVA O SERVIDOR, A BASE DE DADOS FICAVA COM UM PROBLEMA NA PRIMEIRA RESERVA
+                //ATRAVES DESTA IMPLEMENTAÇÃO, ERRO CORRIGIDO
+                if(servidorReiniciou){
+
+                    write.println("\n" + idParaFile + "@" + dataMarcacao + "@" + escolhaRefeicao + "@" + numeroDePessoas);
+                    servidorReiniciou = false;
+
+                }else{
+
+                    write.println(idParaFile + "@" + dataMarcacao + "@" + escolhaRefeicao + "@" + numeroDePessoas);
+
+                }
+                
             }
             
            
@@ -172,16 +187,23 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                 && listaReservasParaVerificacoes.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)
                 && listaReservasParaVerificacoes.get(i).getNumeroDePessoas() == 2){
 
-                erroMesas = false;    
+                erroMesas = false;
+
                 contadorDeMesas2Pessoas++;
                 idParaFile = contadorDeMesas2Pessoas; 
+
                 System.out.println("cnt2:" + contadorDeMesas2Pessoas);
+
                 if(contadorDeMesas2Pessoas > 10){
+
                     erroMesas = true;
                     mesaCodeErro();
+
                 } else{
+
                     Reservas reservaValida = new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas);
                     listaReservas.add(reservaValida);
+
                 }
             }
 
@@ -193,13 +215,19 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
 
                 contadorDeMesas4Pessoas++;
                 idParaFile = contadorDeMesas4Pessoas; 
+
                 System.out.println("cnt4:" + contadorDeMesas4Pessoas);
+
                 if(contadorDeMesas4Pessoas > 15){
+
                     erroMesas = true;
                     mesaCodeErro();
+
                 } else{
+
                     Reservas reservaValida = new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas);
                     listaReservas.add(reservaValida);
+
                 }  
             }
 
@@ -211,13 +239,19 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
 
                 contadorDeMesas8Pessoas++;
                 idParaFile = contadorDeMesas8Pessoas; 
+
                 System.out.println("cnt8:" + contadorDeMesas8Pessoas);
+
                 if(contadorDeMesas8Pessoas > 20){
+
                     erroMesas = true;
                     mesaCodeErro();
+
                 } else{
+
                     Reservas reservaValida = new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas);
                     listaReservas.add(reservaValida);
+
                 }  
             } 
 
@@ -226,15 +260,22 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                 && listaReservasParaVerificacoes.get(i).getNumeroDePessoas() == 12){
                     
                 erroMesas = false;
+
                 contadorDeMesas12Pessoas++;
                 idParaFile = contadorDeMesas12Pessoas; 
+
                 System.out.println("cnt12:" + contadorDeMesas12Pessoas);
+
                 if(contadorDeMesas12Pessoas > 25){
+
                     erroMesas = true;
                     mesaCodeErro();
+
                 } else{
+
                     Reservas reservaValida = new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas);
                     listaReservas.add(reservaValida);
+
                 }  
             }
 
