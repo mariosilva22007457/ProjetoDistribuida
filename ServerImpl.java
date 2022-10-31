@@ -153,7 +153,10 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
 
     public void marcarMesa(String DataInserida, String jantarOUalmocoInserido, int quantidadeDePessoas) throws RemoteException {
     
-        int contadorDeMesas = 0;
+        int contadorDeMesas2Pessoas = 0;
+        int contadorDeMesas4Pessoas = 10;
+        int contadorDeMesas8Pessoas = 15;
+        int contadorDeMesas12Pessoas = 20;
         
         for (int i = 0; i < listaReservasParaVerificacoes.size(); i++) {
            
@@ -161,10 +164,11 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                 && listaReservasParaVerificacoes.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)
                 && listaReservasParaVerificacoes.get(i).getNumeroDePessoas() == 2){
 
-                contadorDeMesas++;
-                idParaFile = contadorDeMesas; 
-               
-                if(contadorDeMesas > 10){
+                erroMesas = false;    
+                contadorDeMesas2Pessoas++;
+                idParaFile = contadorDeMesas2Pessoas; 
+                System.out.println("cnt2:" + contadorDeMesas2Pessoas);
+                if(contadorDeMesas2Pessoas > 10){
                     erroMesas = true;
                     mesaCodeErro();
                 } else{
@@ -176,15 +180,17 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
             if(listaReservasParaVerificacoes.get(i).getData().equals(DataInserida) 
                 && listaReservasParaVerificacoes.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)
                 && listaReservasParaVerificacoes.get(i).getNumeroDePessoas() == 4){
+                    
+                erroMesas = false;    
 
-                contadorDeMesas++;
-                idParaFile = contadorDeMesas; 
-
-                if(contadorDeMesas > 5){
+                contadorDeMesas4Pessoas++;
+                idParaFile = contadorDeMesas4Pessoas; 
+                System.out.println("cnt4:" + contadorDeMesas4Pessoas);
+                if(contadorDeMesas4Pessoas > 15){
                     erroMesas = true;
                     mesaCodeErro();
                 } else{
-                    Reservas reservaValida = new Reservas(contadorDeMesas, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas);
+                    Reservas reservaValida = new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas);
                     listaReservas.add(reservaValida);
                 }  
             }
@@ -193,14 +199,16 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                 && listaReservasParaVerificacoes.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)
                 && listaReservasParaVerificacoes.get(i).getNumeroDePessoas() == 8){
 
-                contadorDeMesas++;
-                idParaFile = contadorDeMesas; 
+                erroMesas = false;    
 
-                if(contadorDeMesas > 5){
+                contadorDeMesas8Pessoas++;
+                idParaFile = contadorDeMesas8Pessoas; 
+                System.out.println("cnt8:" + contadorDeMesas8Pessoas);
+                if(contadorDeMesas8Pessoas > 20){
                     erroMesas = true;
                     mesaCodeErro();
                 } else{
-                    Reservas reservaValida = new Reservas(contadorDeMesas, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas);
+                    Reservas reservaValida = new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas);
                     listaReservas.add(reservaValida);
                 }  
             } 
@@ -208,15 +216,16 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
             if(listaReservasParaVerificacoes.get(i).getData().equals(DataInserida) 
                 && listaReservasParaVerificacoes.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)
                 && listaReservasParaVerificacoes.get(i).getNumeroDePessoas() == 12){
-            
-                contadorDeMesas++;
-                idParaFile = contadorDeMesas; 
-
-                if(contadorDeMesas > 5){
+                    
+                erroMesas = false;
+                contadorDeMesas12Pessoas++;
+                idParaFile = contadorDeMesas12Pessoas; 
+                System.out.println("cnt12:" + contadorDeMesas12Pessoas);
+                if(contadorDeMesas12Pessoas > 25){
                     erroMesas = true;
                     mesaCodeErro();
                 } else{
-                    Reservas reservaValida = new Reservas(contadorDeMesas, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas);
+                    Reservas reservaValida = new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas);
                     listaReservas.add(reservaValida);
                 }  
             }
