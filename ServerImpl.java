@@ -40,7 +40,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
         System.out.println("\nServer Ready");
     }
 
-    public void saveDados(String dataMarcacao, String escolhaRefeicao, int numeroDePessoas) throws RemoteException, Exception {
+    public void saveDados(String dataMarcacao, String escolhaRefeicao, int numeroDePessoas, String nomeDaReserva) 
+        throws RemoteException, Exception {
 
         //GUARDA DADOS NA BASE DE DADOS (Ficheiro TXT)
         try {  
@@ -63,14 +64,14 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
             PrintWriter write = new PrintWriter(writer);
 
 
-            Reservas a = new Reservas(idParaFile,dataMarcacao, escolhaRefeicao, numeroDePessoas);
+            Reservas a = new Reservas(idParaFile,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
             
             //listaReservas = listaReservasParaVerificacoes;
             listaReservasParaVerificacoes.add(a); 
             
             System.out.println("CHEGUEI 1");
             //CHAMADA FUNCAO QUE VERIFICA SE PODE REALIZAR A MARCACAO OU NAO
-            marcarMesa(dataMarcacao,escolhaRefeicao, numeroDePessoas);
+            marcarMesa(dataMarcacao,escolhaRefeicao, numeroDePessoas, nomeDaReserva);
             System.out.println("CHEGUEI 2");
             
             if(!mesaCodeErro()){
@@ -79,12 +80,14 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                 //ATRAVES DESTA IMPLEMENTAÇÃO, ERRO CORRIGIDO
                 if(servidorReiniciou){
 
-                    write.println("\n" + idParaFile + "@" + dataMarcacao + "@" + escolhaRefeicao + "@" + numeroDePessoas);
+                    write.println("\n" + idParaFile + "@" + dataMarcacao + "@" + escolhaRefeicao + "@" + numeroDePessoas
+                        + "@" + nomeDaReserva);
                     servidorReiniciou = false;
 
                 }else{
 
-                    write.println(idParaFile + "@" + dataMarcacao + "@" + escolhaRefeicao + "@" + numeroDePessoas);
+                    write.println(idParaFile + "@" + dataMarcacao + "@" + escolhaRefeicao + "@" + numeroDePessoas
+                        + "@" + nomeDaReserva);
 
                 }
                 
@@ -152,8 +155,9 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                 String data = dados[1];
                 String escolhaRefeicao  = dados[2];
                 int  numeroDePessoas  = Integer.parseInt(dados[3]);
-    
-                Reservas reserva = new Reservas(id, data, escolhaRefeicao,numeroDePessoas);
+                String nomeDaReserva = dados [4];
+
+                Reservas reserva = new Reservas(id, data, escolhaRefeicao,numeroDePessoas,nomeDaReserva);
                 
                 //Adiciona verdadeiramente no Arraylist de reservas
                 listaReservas.add(reserva);
@@ -174,7 +178,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
         }
     }
 
-    public void marcarMesa(String DataInserida, String jantarOUalmocoInserido, int quantidadeDePessoas) throws RemoteException {
+    public void marcarMesa(String DataInserida, String jantarOUalmocoInserido, int quantidadeDePessoas, String nomeDaReserva) 
+        throws RemoteException {
     
         int contadorDeMesas2Pessoas = 0;
         int contadorDeMesas4Pessoas = 10;
@@ -201,7 +206,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
 
                 } else{
 
-                    Reservas reservaValida = new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas);
+                    Reservas reservaValida = 
+                    new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas,nomeDaReserva);
                     listaReservas.add(reservaValida);
 
                 }
@@ -225,7 +231,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
 
                 } else{
 
-                    Reservas reservaValida = new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas);
+                    Reservas reservaValida = 
+                    new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas,nomeDaReserva);
                     listaReservas.add(reservaValida);
 
                 }  
@@ -249,7 +256,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
 
                 } else{
 
-                    Reservas reservaValida = new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas);
+                    Reservas reservaValida =
+                     new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas,nomeDaReserva);
                     listaReservas.add(reservaValida);
 
                 }  
@@ -273,7 +281,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
 
                 } else{
 
-                    Reservas reservaValida = new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas);
+                    Reservas reservaValida =
+                     new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas,nomeDaReserva);
                     listaReservas.add(reservaValida);
 
                 }  

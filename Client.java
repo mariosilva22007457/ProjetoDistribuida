@@ -21,7 +21,7 @@ public class Client {
     public static void main(String args[]) {
         
         try {
-            
+
             String ServerURL = "rmi://" + args[0] + "/Server";
             ServerIntf ServerIntf = (ServerIntf)Naming.lookup(ServerURL);
            
@@ -52,8 +52,12 @@ public class Client {
                     input = new Scanner(System.in);
                     int numeroDePessoas = input.nextInt();
 
+                    System.out.println("\nPor favor, indique-nos o nome da reserva)");
+                    input = new Scanner(System.in);
+                    String nomeDaReserva = input.nextLine();
+
                 
-                    ServerIntf.saveDados(data,escolhaMarcacao,numeroDePessoas);
+                    ServerIntf.saveDados(data,escolhaMarcacao,numeroDePessoas,nomeDaReserva);
 
                     if(ServerIntf.mesaCodeErro()){
                         System.out.println("\nSem mesas disponiveis para pessoas na categoria escolhida por si!\nPedimos desculpa, tente inserir outra data válida\n");
