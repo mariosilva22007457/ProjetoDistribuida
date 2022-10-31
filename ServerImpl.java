@@ -25,15 +25,17 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
 
         lerDados();
 
+        System.out.println("\n|DEBUG LISTA RESERVAS|");
         for (int i = 0; i < listaReservas.size(); i++) {
             System.out.println(listaReservas.get(i));
         }
-        System.out.println("separar");
+
+        System.out.println("\n|DEBUG LISTA RESERVAS PARA VERIFICAÇÃO|");
         for (int i = 0; i < listaReservasParaVerificacoes.size(); i++) {
             System.out.println(listaReservasParaVerificacoes.get(i));
         }
 
-        System.out.println("Server Ready");
+        System.out.println("\nServer Ready");
     }
 
     public void saveDados(String dataMarcacao, String escolhaRefeicao, int numeroDePessoas) throws RemoteException, Exception {
@@ -136,8 +138,15 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                 String escolhaRefeicao  = dados[2];
                 int  numeroDePessoas  = Integer.parseInt(dados[3]);
     
-                Reservas reserva = new Reservas(id, data, escolhaRefeicao,numeroDePessoas );
+                Reservas reserva = new Reservas(id, data, escolhaRefeicao,numeroDePessoas);
+                
+                //Adiciona verdadeiramente no Arraylist de reservas
                 listaReservas.add(reserva);
+                
+                //Adiciona também  no Arraylist de verificações para validação de marcações
+                //Chamamos a funcao de marcar mesa, para guardar em memória as marcações antigas
+                listaReservasParaVerificacoes.add(reserva);
+                //marcarMesa(data,escolhaRefeicao, numeroDePessoas);
 
             }
 
@@ -147,7 +156,6 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
 
         } catch (Exception e) {
             throw new Exception("ERRO AO TRANSFERIR DADOS DA BASE DE DADOS"); 
-  
         }
     }
 
