@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -21,13 +22,25 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
     public static boolean servidorReiniciou = false;
     public static int codigoID = 0;
 
+    public static int contadorDeMesas2Pessoas = 0;
+    public static int contadorDeMesas4Pessoas = 10;
+    public static int contadorDeMesas8Pessoas = 15;
+    public static int contadorDeMesas12Pessoas = 20;
+    public static boolean segurancaApaga = false;
+    public static boolean segurancaEscreve = false;
+
+
     //Quando se liga o servidor
     public ServerImpl() throws RemoteException, Exception {
 
         System.out.println("Server turning ON\nGetting Data...");
 
         lerDados();
-        servidorReiniciou = true;
+
+        if(listaReservas.size() > 1){
+            servidorReiniciou = true;
+        }
+        
         System.out.println("\n|DEBUG LISTA RESERVAS|");
         for (int i = 0; i < listaReservas.size(); i++) {
             System.out.println(listaReservas.get(i));
@@ -89,7 +102,6 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
 
                     write.println(idParaFile + "@" + dataMarcacao + "@" + escolhaRefeicao + "@" + numeroDePessoas
                         + "@" + nomeDaReserva);
-
                 }
                 
             }
@@ -182,21 +194,26 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
     public void marcarMesa(String DataInserida, String jantarOUalmocoInserido, int quantidadeDePessoas, String nomeDaReserva) 
         throws RemoteException {
     
-        int contadorDeMesas2Pessoas = 0;
-        int contadorDeMesas4Pessoas = 10;
-        int contadorDeMesas8Pessoas = 15;
-        int contadorDeMesas12Pessoas = 20;
-        
+        contadorDeMesas2Pessoas = 0;
+        contadorDeMesas4Pessoas = 10;
+        contadorDeMesas8Pessoas = 15;
+        contadorDeMesas12Pessoas = 20;
+
+
         for (int i = 0; i < listaReservasParaVerificacoes.size(); i++) {
            
             if(listaReservasParaVerificacoes.get(i).getData().equals(DataInserida) 
                 && listaReservasParaVerificacoes.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)
                 && listaReservasParaVerificacoes.get(i).getNumeroDePessoas() == 2){
-
+                
                 erroMesas = false;
+                segurancaApaga = false;
+                //SE APAGOU DADOS DA BD, ENTAO PROTEGE O VALOR DE ID DA MESA
+                if(segurancaApaga == false){
+                    contadorDeMesas2Pessoas++;
+                    idParaFile = contadorDeMesas2Pessoas; 
+                }
 
-                contadorDeMesas2Pessoas++;
-                idParaFile = contadorDeMesas2Pessoas; 
 
                 System.out.println("cnt2:" + contadorDeMesas2Pessoas);
 
@@ -221,9 +238,14 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                 && listaReservasParaVerificacoes.get(i).getNumeroDePessoas() == 4){
                     
                 erroMesas = false;    
+                
+                //SE APAGOU DADOS DA BD, ENTAO PROTEGE O VALOR DE ID DA MESA
+                if(segurancaApaga == false){
+                    contadorDeMesas4Pessoas++;
+                    idParaFile = contadorDeMesas4Pessoas; 
+                    segurancaApaga = true;
+                }
 
-                contadorDeMesas4Pessoas++;
-                idParaFile = contadorDeMesas4Pessoas; 
 
                 System.out.println("cnt4:" + contadorDeMesas4Pessoas);
 
@@ -249,8 +271,13 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
 
                 erroMesas = false;    
 
-                contadorDeMesas8Pessoas++;
-                idParaFile = contadorDeMesas8Pessoas; 
+                //SE APAGOU DADOS DA BD, ENTAO PROTEGE O VALOR DE ID DA MESA
+                if(segurancaApaga == false){
+                    contadorDeMesas8Pessoas++;
+                    idParaFile = contadorDeMesas8Pessoas; 
+                    segurancaApaga = true;
+                }
+
 
                 System.out.println("cnt8:" + contadorDeMesas8Pessoas);
 
@@ -275,9 +302,13 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                 && listaReservasParaVerificacoes.get(i).getNumeroDePessoas() == 12){
                     
                 erroMesas = false;
-
-                contadorDeMesas12Pessoas++;
-                idParaFile = contadorDeMesas12Pessoas; 
+                
+                //SE APAGOU DADOS DA BD, ENTAO PROTEGE O VALOR DE ID DA MESA
+                if(segurancaApaga == false){
+                    contadorDeMesas12Pessoas++;
+                    idParaFile = contadorDeMesas12Pessoas; 
+                    segurancaApaga = true;
+                }
 
                 System.out.println("cnt12:" + contadorDeMesas12Pessoas);
 
@@ -310,7 +341,16 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
     }
 
         
-    public void cancelarMesa(int idEntrada,String DataInserida, String jantarOUalmocoInserido) throws RemoteException {
+    public void cancelarMesa(int idEntrada,String DataInserida, String jantarOUalmocoInserido, int quantidadeDePessoas, String nomeDaReserva) 
+        throws RemoteException {
+
+        segurancaApaga = false;
+
+        try {
+            lerDados();
+        } catch (Exception e) {        
+        }    
+            
 
         for (int i = 0; i < listaReservasParaVerificacoes.size(); i++) {
 
@@ -321,9 +361,51 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                 listaReservasParaVerificacoes.remove(i);
                 listaReservas.remove(i);
                 System.out.println("ENTREI NO CANCELAR");
-
+                
                 try {   
-            
+
+
+                    File inputFile = new File("BaseDeDados.txt");
+                    File tempFile = new File("BDtemporaria.txt");
+
+                    BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+                    BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+                    
+                    String lineToRemove = idEntrada + "@" + DataInserida + "@" + jantarOUalmocoInserido + "@" + quantidadeDePessoas + "@" + nomeDaReserva;
+                    String currentLine;
+                    
+
+                    //REMOVE O ID DA RESERVA APAGADA
+                    if(quantidadeDePessoas == 2){
+                        System.out.println("PIXA ==>" + contadorDeMesas2Pessoas);
+                        segurancaApaga = true;
+                        segurancaEscreve = false;
+
+                        contadorDeMesas2Pessoas--;
+                        System.out.println("PIXA2 ===>" + contadorDeMesas2Pessoas);
+                    }else if(quantidadeDePessoas == 4){
+                        contadorDeMesas4Pessoas--;
+                    }else if(quantidadeDePessoas == 8){
+                        contadorDeMesas8Pessoas--;
+                    }else if(quantidadeDePessoas == 12){
+                        contadorDeMesas12Pessoas--;
+                    }
+ 
+
+                    while((currentLine = reader.readLine()) != null) {
+
+                        String trimmedLine = currentLine.trim();
+                        if(trimmedLine.equals(lineToRemove)) {
+                            continue;
+                        }
+                        writer.write(currentLine + System.getProperty("line.separator")); 
+
+                    }
+                    writer.close(); 
+                    reader.close(); 
+                    boolean successful = tempFile.renameTo(inputFile);
+                    
+                    /* 
                     FileReader fr = new FileReader("BaseDeDados.txt");
                     BufferedReader reader = new BufferedReader(fr);
             
@@ -339,6 +421,12 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                         String data = dados[1];
                         String escolhaRefeicao  = dados[2];
 
+                        System.out.println("ID"+ idEntrada + "|" + id);
+                        System.out.println("DATA"+ DataInserida + "|" + data);
+                        System.out.println("TIPO"+ jantarOUalmocoInserido + "|" + escolhaRefeicao);
+                        System.out.println("============");
+
+
                         if( (id==idEntrada) && (data == DataInserida) && (escolhaRefeicao == jantarOUalmocoInserido)){
                             linha = null;
                         }
@@ -349,11 +437,9 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
         
                     reader.close();
                     fr.close();
-                 
+                 */
         
                 } catch (Exception e) {}
-
-
 
             }
         }
