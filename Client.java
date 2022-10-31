@@ -2,6 +2,7 @@ import java.rmi.*;
 import java.util.Scanner;
 
 import javax.swing.JSpinner.NumberEditor;
+import javax.swing.text.StyledEditorKit.BoldAction;
 public class Client {
 
     public static void menu(){
@@ -37,25 +38,47 @@ public class Client {
                 numeroInput = input.nextInt();
 
                 if(numeroInput == 1){
+
                     System.out.println("Proceda à reserva de mesa...\n");
-    
-                    System.out.println("\nIntroduza a data na qual deseja marcar mesa, do seguinte modo: DD/MM/YY\n");
+                    
+
                     input = new Scanner(System.in);
-                    String data = input.nextLine();
+                    String data = "";
+                    do {
+                        System.out.println("\nIntroduza a data na qual deseja marcar mesa, do seguinte modo: DD/MM/YY\n");
+                        input = new Scanner(System.in);
+                        data = input.nextLine();
+                    } while (!validaData(data));
+                   
+
+
+                    input = new Scanner(System.in);
+                    String escolhaMarcacao = "";
+                    do {
+                        System.out.println("\nVai desejar marcar mesa para jantar ou almoço? Responda de forma: A -> Almoço / J -> Jantar");
+                        input = new Scanner(System.in);
+                        escolhaMarcacao = input.nextLine().toUpperCase();
+                    } while (!validaRefeicao(escolhaMarcacao));
 
                     
-                    System.out.println("\nVai desejar marcar mesa para jantar ou almoço? Responda de forma: A -> Almoço / J -> Jantar");
                     input = new Scanner(System.in);
-                    String escolhaMarcacao = input.nextLine();
-                    
-                    System.out.println("\nPor favor, indique-nos para quantas pessoas será a mesa (2,4,8,12 Pessoas)");
-                    input = new Scanner(System.in);
-                    int numeroDePessoas = input.nextInt();
+                    int numeroDePessoas = 0; 
+                    do {
+                        System.out.println("\nPor favor, indique-nos para quantas pessoas será a mesa (2,4,8,12 Pessoas)");
+                        input = new Scanner(System.in);
+                        numeroDePessoas = input.nextInt();
+                    } while (!validaNumeroPessoas(numeroDePessoas));
+                  
 
-                    System.out.println("\nPor favor, indique-nos o nome da reserva)");
-                    input = new Scanner(System.in);
-                    String nomeDaReserva = input.nextLine();
 
+                    input = new Scanner(System.in);
+                    String nomeDaReserva = "";
+                    do {
+                        System.out.println("\nPor favor, indique-nos o nome da reserva");
+                        input = new Scanner(System.in);
+                        nomeDaReserva = input.nextLine();
+                    } while (!validaNomePessoas(nomeDaReserva));
+            
                 
                     ServerIntf.saveDados(data,escolhaMarcacao,numeroDePessoas,nomeDaReserva);
 
@@ -77,4 +100,110 @@ public class Client {
             System.out.println("Obrigado, volte sempre!");
         }
     }
+
+
+    public static boolean validaData(String dataInput) throws RemoteException {
+
+        try {
+
+            String[] dados = dataInput.split("/");
+
+            int dia  = Integer.parseInt(dados[0]);
+            int mes  = Integer.parseInt(dados[1]);
+            int ano  = Integer.parseInt(dados[2]);
+           
+            if (mes == 1 || mes == 3 || mes == 5 || mes == 7 || mes == 8 || mes == 10 || mes == 12){
+                if(dia < 0 || dia > 31){
+                    System.out.println("Data Inválida");
+                    return false;
+                }
+            }
+
+            if (mes == 4 || mes == 6 || mes == 9 || mes == 11){
+                if(dia < 0 || dia > 30){
+                    System.out.println("Data Inválida, o mês introduzido:" + mes + "tem entre 1 a 30 dias");
+                    return false;
+                }
+            }
+
+            if( (ano%100 != 0 && ano%4 == 0) || (ano%400 == 0) ){
+                //Ano Bissexto
+                if(mes == 2){
+                    if(dia < 0 || dia > 29){
+                        System.out.println("Data Inválida, o mês introduzido: 2 " + "tem entre 1 a 29 dias");
+                        return false;
+                    }   
+                }
+            }else{
+                //Ano não Bissexto
+                if(mes == 2){
+                    if(dia < 0 || dia > 28){
+                        System.out.println("Data Inválida, o mês introduzido: 2"+ "tem entre 1 a 28 dias");
+                        return false;
+                    }   
+                }
+            }
+
+            return true;
+
+        } catch (Exception e) {
+
+            System.out.println("Data Inválida");
+            return false;
+
+        }
+    }
+
+    public static boolean validaRefeicao(String refeicaoInput) throws RemoteException {
+       
+        if ( (refeicaoInput.equals("A")) || (refeicaoInput.equals("J")) ){
+
+            return true;
+
+        }else{
+
+            System.out.println("Escolha uma opção válida!");
+            return false;
+
+        }
+
+        
+    }
+
+    public static boolean validaNumeroPessoas(int NumeroInput) throws RemoteException {
+      
+        if ( (NumeroInput == 2) || (NumeroInput == 4) || (NumeroInput == 8) || (NumeroInput == 12) ){
+
+            return true;
+
+        }else{
+
+            System.out.println("Escolha uma opção válida!");
+            return false;
+
+        }
+
+    }
+
+    public static boolean validaNomePessoas(String nomeInput) throws RemoteException {
+       
+        Boolean var = nomeInput.matches("[a-zA-Z]+");
+
+
+        if ( var ){
+
+            return true;
+
+        }else{
+
+            System.out.println("Introduza um nome válido!");
+            return false;
+
+        }
+    }
+
+
+
+
+
 }
