@@ -19,6 +19,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
     public static int idParaFile = 1;
     public static boolean erroMesas = false;
     public static boolean servidorReiniciou = false;
+    public static int codigoID = 0;
 
     //Quando se liga o servidor
     public ServerImpl() throws RemoteException, Exception {
@@ -209,6 +210,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                     Reservas reservaValida = 
                     new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas,nomeDaReserva);
                     listaReservas.add(reservaValida);
+                    //CODIGO ID DA MESA PARA O CLIENTE SABER
+                    codigoID = idParaFile;
 
                 }
             }
@@ -234,6 +237,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                     Reservas reservaValida = 
                     new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas,nomeDaReserva);
                     listaReservas.add(reservaValida);
+                    //CODIGO ID DA MESA PARA O CLIENTE SABER
+                    codigoID = idParaFile;                    
 
                 }  
             }
@@ -259,6 +264,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                     Reservas reservaValida =
                      new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas,nomeDaReserva);
                     listaReservas.add(reservaValida);
+                    //CODIGO ID DA MESA PARA O CLIENTE SABER
+                    codigoID = idParaFile;
 
                 }  
             } 
@@ -284,6 +291,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                     Reservas reservaValida =
                      new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas,nomeDaReserva);
                     listaReservas.add(reservaValida);
+                    //CODIGO ID DA MESA PARA O CLIENTE SABER
+                    codigoID = idParaFile;
 
                 }  
             }
@@ -295,7 +304,59 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
     public boolean mesaCodeErro() throws RemoteException {
         return erroMesas;
     }
-        
 
+    public int codigoIDmesa() throws RemoteException {
+        return codigoID;
+    }
+
+        
+    public void cancelarMesa(int idEntrada,String DataInserida, String jantarOUalmocoInserido) throws RemoteException {
+
+        for (int i = 0; i < listaReservasParaVerificacoes.size(); i++) {
+
+            if(listaReservasParaVerificacoes.get(i).getId() == idEntrada
+                && listaReservasParaVerificacoes.get(i).getData().equals(DataInserida) 
+                && listaReservasParaVerificacoes.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)){
+                
+                listaReservasParaVerificacoes.remove(i);
+                listaReservas.remove(i);
+                System.out.println("ENTREI NO CANCELAR");
+
+                try {   
+            
+                    FileReader fr = new FileReader("BaseDeDados.txt");
+                    BufferedReader reader = new BufferedReader(fr);
+            
+                    String linha = null;
+                    
+                    while ((linha = reader.readLine()) != null) {
+                        System.out.println("ENTREI NO FILE");
+                        
+                        
+                        String[] dados = linha.split("@");
+
+                        int id = Integer.parseInt(dados[0]);
+                        String data = dados[1];
+                        String escolhaRefeicao  = dados[2];
+
+                        if( (id==idEntrada) && (data == DataInserida) && (escolhaRefeicao == jantarOUalmocoInserido)){
+                            linha = null;
+                        }
+                        linha.trim();
+                        
+        
+                    }
+        
+                    reader.close();
+                    fr.close();
+                 
+        
+                } catch (Exception e) {}
+
+
+
+            }
+        }
+    }
 
 }

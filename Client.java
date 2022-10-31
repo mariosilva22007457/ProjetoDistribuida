@@ -87,8 +87,42 @@ public class Client {
                         continue;
                     }else{
                         System.out.println("\nA sua reserva foi marcada com sucesso!\n");
+                        System.out.println("o ID da sua reserva é"+ ServerIntf.codigoIDmesa());
                     }
                    
+                }else if(numeroInput == 2){
+
+                    System.out.println("Proceda ao cancelamento da reserva...\n");
+                    
+
+                    input = new Scanner(System.in);
+                    String data = "";
+                    do {
+                        System.out.println("\nIntroduza a data na qual deseja cancelar a reserva, do seguinte modo: DD/MM/YY\n");
+                        input = new Scanner(System.in);
+                        data = input.nextLine();
+                    } while (!validaData(data));
+                   
+
+
+                    input = new Scanner(System.in);
+                    String escolhaMarcacao = "";
+                    do {
+                        System.out.println("\nIndique se a reserva que tinha marcada era Almoço ou Jantar? Responda de forma: A -> Almoço / J -> Jantar");
+                        input = new Scanner(System.in);
+                        escolhaMarcacao = input.nextLine().toUpperCase();
+                    } while (!validaRefeicao(escolhaMarcacao));
+
+                    int id = 0;
+                    System.out.println("\nIntroduza o ID da mesa que lhe foi fornecido pelo restaurante");
+                    input = new Scanner(System.in);
+                    id = input.nextInt();
+                    
+                    
+                    //o ID é dado pelo restaurante ("PARA SE CONFIRMAR")
+                    ServerIntf.cancelarMesa(id,data, escolhaMarcacao);
+
+
                 }else{
                     System.exit(0);
                 }
