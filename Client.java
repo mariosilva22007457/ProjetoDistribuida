@@ -3,6 +3,7 @@ import java.util.Scanner;
 
 import javax.swing.JSpinner.NumberEditor;
 import javax.swing.text.StyledEditorKit.BoldAction;
+import javax.xml.transform.Source;
 public class Client {
 
     public static void menu(){
@@ -78,18 +79,15 @@ public class Client {
                         input = new Scanner(System.in);
                         nomeDaReserva = input.nextLine();
                     } while (!validaNomePessoas(nomeDaReserva));
-            
-                
-                    ServerIntf.saveDados(data,escolhaMarcacao,numeroDePessoas,nomeDaReserva);
 
+                    ServerIntf.saveDados(data,escolhaMarcacao,numeroDePessoas,nomeDaReserva);
+            
                     if(ServerIntf.mesaCodeErro()){
                         System.out.println("\nSem mesas disponiveis para pessoas na categoria escolhida por si!\nPedimos desculpa, tente inserir outra data válida\n");
                         continue;
                     }else{
                         System.out.println("\nA sua reserva foi marcada com sucesso!\n");
-                        System.out.println("o ID da sua reserva é "+ ServerIntf.codigoIDmesa());
-                    }
-                   
+                    }                   
                 }else if(numeroInput == 2){
 
                     System.out.println("Proceda ao cancelamento da reserva...\n");
@@ -113,16 +111,6 @@ public class Client {
                         escolhaMarcacao = input.nextLine().toUpperCase();
                     } while (!validaRefeicao(escolhaMarcacao));
 
-                    
-                    input = new Scanner(System.in);
-                    int numeroDePessoas = 0; 
-                    do {
-                        System.out.println("\nPor favor, indique-nos para quantas pessoas estava a mesa marcada (2,4,8,12 Pessoas)");
-                        input = new Scanner(System.in);
-                        numeroDePessoas = input.nextInt();
-                    } while (!validaNumeroPessoas(numeroDePessoas));
-                  
-
 
                     input = new Scanner(System.in);
                     String nomeDaReserva = "";
@@ -130,23 +118,12 @@ public class Client {
                         System.out.println("\nPor favor, indique-nos qual nome da pessoa que marcou a reserva");
                         input = new Scanner(System.in);
                         nomeDaReserva = input.nextLine();
-                    } while (!validaNomePessoas(nomeDaReserva));
-
-                    int id = 0;
-                    System.out.println("\nIntroduza o ID da mesa que lhe foi fornecido pelo restaurante");
-                    input = new Scanner(System.in);
-                    id = input.nextInt();
+                    } while (!validaNomePessoas(nomeDaReserva));                    
                     
-                    
-                    //o ID é dado pelo restaurante ("PARA SE CONFIRMAR")
-                    ServerIntf.cancelarMesa(id,data, escolhaMarcacao, numeroDePessoas, nomeDaReserva);
-                   
-
-                }else{
-                    System.exit(0);
+                    ServerIntf.cancelarMesa(data, escolhaMarcacao,nomeDaReserva);
                 }
                 
-            } while ( (numeroInput!=1) || (numeroInput!=2) || (numeroInput!=3) || (numeroInput!=4));
+            } while ((numeroInput!=1) || (numeroInput!=2) || (numeroInput!=3) || (numeroInput!=4));
 
             input.close();
         }catch(Exception e) {

@@ -1,33 +1,21 @@
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.rmi.*;
 import java.rmi.server.*;
-import java.security.PublicKey;
 import java.util.ArrayList;
-
 
 
 public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
 
+    //LISTA QUE GUARDA TODAS AS RESERVAS
     ArrayList<Reservas> listaReservas = new ArrayList<>();
-    ArrayList<Reservas> listaReservasParaVerificacoes = new ArrayList<>();
    
-    //VARIAVEIS GLOBAIS PARA EFEITO DE LOGS CORRETOS NO SERVIDOR 
-    public static int idParaFile = 1;
-    public static boolean erroMesas = false;
+    //VARIAVEIS GLOBAIS PARA EFEITO DE ERROS/LOGS/REINICIO SERVIDOR CORRETOS NO SERVIDOR 
     public static boolean servidorReiniciou = false;
-    public static int codigoID = 0;
-
-    public static int contadorDeMesas2Pessoas = 0;
-    public static int contadorDeMesas4Pessoas = 10;
-    public static int contadorDeMesas8Pessoas = 15;
-    public static int contadorDeMesas12Pessoas = 20;
-    public static boolean segurancaApaga = false;
-    public static boolean segurancaEscreve = false;
+    public static boolean erroMesas = false;
 
 
     //Quando se liga o servidor
@@ -35,122 +23,204 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
 
         System.out.println("Server turning ON\nGetting Data...");
 
-        lerDados();
+        guardarDadosProvenientesTXT();
 
         if(listaReservas.size() > 1){
             servidorReiniciou = true;
         }
         
+        //DEBUG -> MOSTRA NO SERVIDOR, OS DADOS IMPORTADOS DO FILE, QUANDO SE LIGA O SERVIDOR
         System.out.println("\n|DEBUG LISTA RESERVAS|");
         for (int i = 0; i < listaReservas.size(); i++) {
             System.out.println(listaReservas.get(i));
         }
 
-        System.out.println("\n|DEBUG LISTA RESERVAS PARA VERIFICAÇÃO|");
-        for (int i = 0; i < listaReservasParaVerificacoes.size(); i++) {
-            System.out.println(listaReservasParaVerificacoes.get(i));
-        }
-
         System.out.println("\nServer Ready");
+    }
+
+    public void guardarDadosNoTXT(){
+        try {
+
+            File file = new File("BaseDeDados.txt");
+            //Argumento TRUE para que dê append no ficheiro e não apague registos antigos
+            FileWriter writer = new FileWriter(file);
+            PrintWriter write = new PrintWriter(writer);
+
+            System.out.println("tam " + listaReservas.size());
+            for (int i = 0; i < listaReservas.size(); i++) {
+                
+               if(servidorReiniciou){
+                    write.println("\n" + listaReservas.get(i).getId() + "@" + listaReservas.get(i).getData() 
+                    + "@" + listaReservas.get(i).getEscolhaRefeicao() + "@" + listaReservas.get(i).getNumeroDePessoas() 
+                    + "@" + listaReservas.get(i).getNomeDaReserva() );
+                }else{
+                    write.println(listaReservas.get(i).getId() + "@" + listaReservas.get(i).getData() 
+                    + "@" + listaReservas.get(i).getEscolhaRefeicao() + "@" + listaReservas.get(i).getNumeroDePessoas() 
+                    + "@" + listaReservas.get(i).getNomeDaReserva() );
+                }    
+
+            }
+           
+            write.close();   
+
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
     }
 
     public void saveDados(String dataMarcacao, String escolhaRefeicao, int numeroDePessoas, String nomeDaReserva) 
         throws RemoteException, Exception {
 
-        //GUARDA DADOS NA BASE DE DADOS (Ficheiro TXT)
-        try {  
-            /* 
-            //SABER QUANTAS LINHAS TEM O FILE
-            FileReader fr = new FileReader("BaseDeDados.txt");
-            BufferedReader reader = new BufferedReader(fr);
+
+        int contadorDeMesas2PessoasAlmoco = 0;
+        int contadorDeMesas4PessoasAlmoco = 10;
+        int contadorDeMesas8PessoasAlmoco = 15;
+        int contadorDeMesas12PessoasAlmoco = 20;
     
-            String linha = null;
-            
-            while ((linha = reader.readLine()) != null) {
-                numeroDaLinha++;
-            }
+        int contadorDeMesas2PessoasJantar = 0;
+        int contadorDeMesas4PessoasJantar = 10;
+        int contadorDeMesas8PessoasJantar = 15;
+        int contadorDeMesas12PessoasJantar = 20;
+        
 
-            reader.close();
-            */
-            File file = new File("BaseDeDados.txt");
-            //Argumento TRUE para que dê append no ficheiro e não apague registos antigos
-            FileWriter writer = new FileWriter(file,true);
-            PrintWriter write = new PrintWriter(writer);
-
-
-            Reservas a = new Reservas(idParaFile,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
-            
-            //listaReservas = listaReservasParaVerificacoes;
-            listaReservasParaVerificacoes.add(a); 
-            
-            System.out.println("CHEGUEI 1");
-            //CHAMADA FUNCAO QUE VERIFICA SE PODE REALIZAR A MARCACAO OU NAO
-            marcarMesa(dataMarcacao,escolhaRefeicao, numeroDePessoas, nomeDaReserva);
-            System.out.println("CHEGUEI 2");
-            
-            if(!mesaCodeErro()){
-
-                //QUANDO REINICIAVA O SERVIDOR, A BASE DE DADOS FICAVA COM UM PROBLEMA NA PRIMEIRA RESERVA
-                //ATRAVES DESTA IMPLEMENTAÇÃO, ERRO CORRIGIDO
-                if(servidorReiniciou){
-
-                    write.println("\n" + idParaFile + "@" + dataMarcacao + "@" + escolhaRefeicao + "@" + numeroDePessoas
-                        + "@" + nomeDaReserva);
-                    servidorReiniciou = false;
-
-                }else{
-
-                    write.println(idParaFile + "@" + dataMarcacao + "@" + escolhaRefeicao + "@" + numeroDePessoas
-                        + "@" + nomeDaReserva);
-                }
-                
-            }
+        //GUARDA DADOS NA BASE DE DADOS (Ficheiro TXT)
+        if(listaReservas.size() == 0){
+            Reservas dadosRecebidosAlmoco = new Reservas(1,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
+            listaReservas.add(dadosRecebidosAlmoco);
             
            
-            /* /
-            if(id == 1){
-                write.println(id + "@" + dataMarcacao + "@" + escolhaRefeicao);
-            }else{
-                write.println(id + "@" + dataMarcacao + "@" + escolhaRefeicao);
+        }else{
+            System.out.println("tamanho array: " + listaReservas.size());
+            for (int i = 0; i < listaReservas.size(); i++) {
+
+                System.out.println("ENTREI NO FOR");
+    
+    
+    
+                if(listaReservas.get(i).getData().equals(dataMarcacao) 
+                    && listaReservas.get(i).getEscolhaRefeicao().equals(escolhaRefeicao)
+                    && listaReservas.get(i).getNumeroDePessoas() == 2 
+                    ){
+                    
+                    if(listaReservas.get(i).getEscolhaRefeicao().equals("A")){
+                        contadorDeMesas2PessoasAlmoco++; 
+                    }else{
+                        contadorDeMesas2PessoasJantar++;
+                    }
+                    
+                }
+
+                if(listaReservas.get(i).getData().equals(dataMarcacao) 
+                && listaReservas.get(i).getEscolhaRefeicao().equals(escolhaRefeicao)
+                && listaReservas.get(i).getNumeroDePessoas() == 4 
+                ){
+                
+                    if(listaReservas.get(i).getEscolhaRefeicao().equals("A")){
+                        contadorDeMesas4PessoasAlmoco++;
+                    }else{
+                        contadorDeMesas4PessoasJantar++;
+                    }
+                    
+                }
+
+                if(listaReservas.get(i).getData().equals(dataMarcacao) 
+                    && listaReservas.get(i).getEscolhaRefeicao().equals(escolhaRefeicao)
+                    && listaReservas.get(i).getNumeroDePessoas() == 8 
+                    ){
+                    
+                    if(listaReservas.get(i).getEscolhaRefeicao().equals("A")){
+                        contadorDeMesas8PessoasAlmoco++;
+                    }else{
+                        contadorDeMesas8PessoasJantar++;
+                    }
+                    
+                }
+
+                if(listaReservas.get(i).getData().equals(dataMarcacao) 
+                    && listaReservas.get(i).getEscolhaRefeicao().equals(escolhaRefeicao)
+                    && listaReservas.get(i).getNumeroDePessoas() == 12 
+                    ){
+                    
+                    if(listaReservas.get(i).getEscolhaRefeicao().equals("A")){
+                        contadorDeMesas12PessoasAlmoco++;
+                    }else{
+                        contadorDeMesas12PessoasJantar++;
+                    }
+                    
+                }
+
             }
-            
-            
-            //FORMA COMO GUARDAR: ID - DIA DA RESERVA - ALMOÇO/JANTAR
-            /* 
-            for (int id = numeroDaLinha+1; id < listaReservas.size()+1 ; id++) {
-                if(verificaSeJaExiste(id)){
-                    continue;
-                }else{
-                    write.append(id + "@" + dataMarcacao + "@" + escolhaRefeicao + "\n");                
-                    idParaLogServer = id;
+
+
+            if(contadorDeMesas2PessoasAlmoco > 10 || contadorDeMesas2PessoasJantar > 10
+                || contadorDeMesas4PessoasJantar > 15  || contadorDeMesas4PessoasJantar > 15
+                || contadorDeMesas8PessoasJantar > 20  || contadorDeMesas8PessoasJantar > 20
+                || contadorDeMesas12PessoasJantar > 25 || contadorDeMesas12PessoasJantar > 25){
+
+                erroMesas = true;
+                mesaCodeErro();
+
+            }else{
+
+                if(numeroDePessoas==2){
+                    if(escolhaRefeicao.equals("A")){
+                        Reservas dadosRecebidosAlmoco = new Reservas(contadorDeMesas2PessoasAlmoco+1,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
+                        listaReservas.add(dadosRecebidosAlmoco);
+                    }else if(escolhaRefeicao.equals("J")){
+                        Reservas dadosRecebidosJantar = new Reservas(contadorDeMesas2PessoasJantar+1,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
+                        listaReservas.add(dadosRecebidosJantar);
+                    }
                 }
 
-                
-                
-            
-                if(id < 1){
-                    write.println(1 + "@" + dataMarcacao + "@" + escolhaRefeicao);
-                    idParaLogServer = 1;
-                }else{
-                    write.println();
-                    write.println(id + "@" + dataMarcacao + "@" + escolhaRefeicao);                
-                    idParaLogServer = id;
+                if(numeroDePessoas==4){
+                    if(escolhaRefeicao.equals("A")){
+                        Reservas dadosRecebidosAlmoco = new Reservas(contadorDeMesas4PessoasAlmoco+1,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
+                        listaReservas.add(dadosRecebidosAlmoco);
+                    }else if(escolhaRefeicao.equals("J")){
+                        Reservas dadosRecebidosJantar = new Reservas(contadorDeMesas4PessoasJantar+1,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
+                        listaReservas.add(dadosRecebidosJantar);
+                    }
                 }
-                
-            }  
-            */
- 
-            System.out.println("Nova Reserva registada no servidor/BD com ID = " + idParaFile);
 
-            write.close();            
+                if(numeroDePessoas==8){
+                    if(escolhaRefeicao.equals("A")){
+                        Reservas dadosRecebidosAlmoco = new Reservas(contadorDeMesas8PessoasAlmoco+1,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
+                        listaReservas.add(dadosRecebidosAlmoco);
+                    }else if(escolhaRefeicao.equals("J")){
+                        Reservas dadosRecebidosJantar = new Reservas(contadorDeMesas8PessoasJantar+1,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
+                        listaReservas.add(dadosRecebidosJantar);
+                    }
+                }
+
+                if(numeroDePessoas==12){
+                    if(escolhaRefeicao.equals("A")){
+                        Reservas dadosRecebidosAlmoco = new Reservas(contadorDeMesas12PessoasAlmoco+1,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
+                        listaReservas.add(dadosRecebidosAlmoco);
+                    }else if(escolhaRefeicao.equals("J")){
+                        Reservas dadosRecebidosJantar = new Reservas(contadorDeMesas12PessoasJantar+1,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
+                        listaReservas.add(dadosRecebidosJantar);
+                    }
+                }
+            }
+        }
+        
+        try {  
             
+            //VAI IMPRIMIR NO SERVIDOR O REGISTO DE RESERVAS
+            System.out.println("\n|DEBUG LISTA RESERVAS|");
+            for (int h = 0; h < listaReservas.size(); h++) {
+                System.out.println(listaReservas.get(h));
+            }
+
+            guardarDadosNoTXT();
+
         } catch (Exception e) {
             throw new Exception("ERRO AO GRAVAR FICHEIRO"); 
         }
 
     }
 
-    public void lerDados() throws RemoteException,Exception {
+    public void guardarDadosProvenientesTXT() throws RemoteException,Exception {
 
 
         try {   
@@ -171,14 +241,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                 String nomeDaReserva = dados [4];
 
                 Reservas reserva = new Reservas(id, data, escolhaRefeicao,numeroDePessoas,nomeDaReserva);
-                
-                //Adiciona verdadeiramente no Arraylist de reservas
+            
                 listaReservas.add(reserva);
-                
-                //Adiciona também  no Arraylist de verificações para validação de marcações
-                //Chamamos a funcao de marcar mesa, para guardar em memória as marcações antigas
-                listaReservasParaVerificacoes.add(reserva);
-                //marcarMesa(data,escolhaRefeicao, numeroDePessoas);
 
             }
 
@@ -187,260 +251,26 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
          
 
         } catch (Exception e) {
+            System.out.println(e.toString());
             throw new Exception("ERRO AO TRANSFERIR DADOS DA BASE DE DADOS"); 
         }
     }
-
-    public void marcarMesa(String DataInserida, String jantarOUalmocoInserido, int quantidadeDePessoas, String nomeDaReserva) 
-        throws RemoteException {
-    
-        contadorDeMesas2Pessoas = 0;
-        contadorDeMesas4Pessoas = 10;
-        contadorDeMesas8Pessoas = 15;
-        contadorDeMesas12Pessoas = 20;
-
-
-        for (int i = 0; i < listaReservasParaVerificacoes.size(); i++) {
-           
-            if(listaReservasParaVerificacoes.get(i).getData().equals(DataInserida) 
-                && listaReservasParaVerificacoes.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)
-                && listaReservasParaVerificacoes.get(i).getNumeroDePessoas() == 2){
-                
-                erroMesas = false;
-                segurancaApaga = false;
-                //SE APAGOU DADOS DA BD, ENTAO PROTEGE O VALOR DE ID DA MESA
-                if(segurancaApaga == false){
-                    contadorDeMesas2Pessoas++;
-                    idParaFile = contadorDeMesas2Pessoas; 
-                }
-
-
-                System.out.println("cnt2:" + contadorDeMesas2Pessoas);
-
-                if(contadorDeMesas2Pessoas > 10){
-
-                    erroMesas = true;
-                    mesaCodeErro();
-
-                } else{
-
-                    Reservas reservaValida = 
-                    new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas,nomeDaReserva);
-                    listaReservas.add(reservaValida);
-                    //CODIGO ID DA MESA PARA O CLIENTE SABER
-                    codigoID = idParaFile;
-
-                }
-            }
-
-            if(listaReservasParaVerificacoes.get(i).getData().equals(DataInserida) 
-                && listaReservasParaVerificacoes.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)
-                && listaReservasParaVerificacoes.get(i).getNumeroDePessoas() == 4){
-                    
-                erroMesas = false;    
-                
-                //SE APAGOU DADOS DA BD, ENTAO PROTEGE O VALOR DE ID DA MESA
-                if(segurancaApaga == false){
-                    contadorDeMesas4Pessoas++;
-                    idParaFile = contadorDeMesas4Pessoas; 
-                    segurancaApaga = true;
-                }
-
-
-                System.out.println("cnt4:" + contadorDeMesas4Pessoas);
-
-                if(contadorDeMesas4Pessoas > 15){
-
-                    erroMesas = true;
-                    mesaCodeErro();
-
-                } else{
-
-                    Reservas reservaValida = 
-                    new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas,nomeDaReserva);
-                    listaReservas.add(reservaValida);
-                    //CODIGO ID DA MESA PARA O CLIENTE SABER
-                    codigoID = idParaFile;                    
-
-                }  
-            }
-
-            if(listaReservasParaVerificacoes.get(i).getData().equals(DataInserida) 
-                && listaReservasParaVerificacoes.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)
-                && listaReservasParaVerificacoes.get(i).getNumeroDePessoas() == 8){
-
-                erroMesas = false;    
-
-                //SE APAGOU DADOS DA BD, ENTAO PROTEGE O VALOR DE ID DA MESA
-                if(segurancaApaga == false){
-                    contadorDeMesas8Pessoas++;
-                    idParaFile = contadorDeMesas8Pessoas; 
-                    segurancaApaga = true;
-                }
-
-
-                System.out.println("cnt8:" + contadorDeMesas8Pessoas);
-
-                if(contadorDeMesas8Pessoas > 20){
-
-                    erroMesas = true;
-                    mesaCodeErro();
-
-                } else{
-
-                    Reservas reservaValida =
-                     new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas,nomeDaReserva);
-                    listaReservas.add(reservaValida);
-                    //CODIGO ID DA MESA PARA O CLIENTE SABER
-                    codigoID = idParaFile;
-
-                }  
-            } 
-
-            if(listaReservasParaVerificacoes.get(i).getData().equals(DataInserida) 
-                && listaReservasParaVerificacoes.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)
-                && listaReservasParaVerificacoes.get(i).getNumeroDePessoas() == 12){
-                    
-                erroMesas = false;
-                
-                //SE APAGOU DADOS DA BD, ENTAO PROTEGE O VALOR DE ID DA MESA
-                if(segurancaApaga == false){
-                    contadorDeMesas12Pessoas++;
-                    idParaFile = contadorDeMesas12Pessoas; 
-                    segurancaApaga = true;
-                }
-
-                System.out.println("cnt12:" + contadorDeMesas12Pessoas);
-
-                if(contadorDeMesas12Pessoas > 25){
-
-                    erroMesas = true;
-                    mesaCodeErro();
-
-                } else{
-
-                    Reservas reservaValida =
-                     new Reservas(idParaFile, DataInserida, jantarOUalmocoInserido, quantidadeDePessoas,nomeDaReserva);
-                    listaReservas.add(reservaValida);
-                    //CODIGO ID DA MESA PARA O CLIENTE SABER
-                    codigoID = idParaFile;
-
-                }  
-            }
-
-        }
-
-    }
-
+ 
     public boolean mesaCodeErro() throws RemoteException {
         return erroMesas;
     }
 
-    public int codigoIDmesa() throws RemoteException {
-        return codigoID;
-    }
-
         
-    public void cancelarMesa(int idEntrada,String DataInserida, String jantarOUalmocoInserido, int quantidadeDePessoas, String nomeDaReserva) 
+    public void cancelarMesa(String DataInserida, String jantarOUalmocoInserido, String nomeDaReserva) 
         throws RemoteException {
 
-        segurancaApaga = false;
+        for (int i = 0; i < listaReservas.size(); i++) {
+            if(listaReservas.get(i).getData().equals(DataInserida)
+                && listaReservas.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)
+                && listaReservas.get(i).getNomeDaReserva().equals(nomeDaReserva)){
 
-        try {
-            lerDados();
-        } catch (Exception e) {        
-        }    
-            
-
-        for (int i = 0; i < listaReservasParaVerificacoes.size(); i++) {
-
-            if(listaReservasParaVerificacoes.get(i).getId() == idEntrada
-                && listaReservasParaVerificacoes.get(i).getData().equals(DataInserida) 
-                && listaReservasParaVerificacoes.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)){
-                
-                listaReservasParaVerificacoes.remove(i);
                 listaReservas.remove(i);
-                System.out.println("ENTREI NO CANCELAR");
-                
-                try {   
-
-
-                    File inputFile = new File("BaseDeDados.txt");
-                    File tempFile = new File("BDtemporaria.txt");
-
-                    BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-                    BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
-                    
-                    String lineToRemove = idEntrada + "@" + DataInserida + "@" + jantarOUalmocoInserido + "@" + quantidadeDePessoas + "@" + nomeDaReserva;
-                    String currentLine;
-                    
-
-                    //REMOVE O ID DA RESERVA APAGADA
-                    if(quantidadeDePessoas == 2){
-                        System.out.println("PIXA ==>" + contadorDeMesas2Pessoas);
-                        segurancaApaga = true;
-                        segurancaEscreve = false;
-
-                        contadorDeMesas2Pessoas--;
-                        System.out.println("PIXA2 ===>" + contadorDeMesas2Pessoas);
-                    }else if(quantidadeDePessoas == 4){
-                        contadorDeMesas4Pessoas--;
-                    }else if(quantidadeDePessoas == 8){
-                        contadorDeMesas8Pessoas--;
-                    }else if(quantidadeDePessoas == 12){
-                        contadorDeMesas12Pessoas--;
-                    }
- 
-
-                    while((currentLine = reader.readLine()) != null) {
-
-                        String trimmedLine = currentLine.trim();
-                        if(trimmedLine.equals(lineToRemove)) {
-                            continue;
-                        }
-                        writer.write(currentLine + System.getProperty("line.separator")); 
-
-                    }
-                    writer.close(); 
-                    reader.close(); 
-                    boolean successful = tempFile.renameTo(inputFile);
-                    
-                    /* 
-                    FileReader fr = new FileReader("BaseDeDados.txt");
-                    BufferedReader reader = new BufferedReader(fr);
-            
-                    String linha = null;
-                    
-                    while ((linha = reader.readLine()) != null) {
-                        System.out.println("ENTREI NO FILE");
-                        
-                        
-                        String[] dados = linha.split("@");
-
-                        int id = Integer.parseInt(dados[0]);
-                        String data = dados[1];
-                        String escolhaRefeicao  = dados[2];
-
-                        System.out.println("ID"+ idEntrada + "|" + id);
-                        System.out.println("DATA"+ DataInserida + "|" + data);
-                        System.out.println("TIPO"+ jantarOUalmocoInserido + "|" + escolhaRefeicao);
-                        System.out.println("============");
-
-
-                        if( (id==idEntrada) && (data == DataInserida) && (escolhaRefeicao == jantarOUalmocoInserido)){
-                            linha = null;
-                        }
-                        linha.trim();
-                        
-        
-                    }
-        
-                    reader.close();
-                    fr.close();
-                 */
-        
-                } catch (Exception e) {}
-
+                guardarDadosNoTXT();        
             }
         }
     }
