@@ -6,6 +6,9 @@ import java.io.PrintWriter;
 import java.rmi.*;
 import java.rmi.server.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
+
+import javax.xml.crypto.Data;
 
 
 public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
@@ -17,6 +20,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
     public static boolean servidorReiniciou = false;
     public static boolean erroMesas = false;
 
+    public static String mensagemMesasLivresAlmoco = "";
+    public static String mensagemMesasLivresJantar = "";
 
     //Quando se liga o servidor
     public ServerImpl() throws RemoteException, Exception {
@@ -46,9 +51,9 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
             FileWriter writer = new FileWriter(file);
             PrintWriter write = new PrintWriter(writer);
 
-            System.out.println("tam " + listaReservas.size());
+
             for (int i = 0; i < listaReservas.size(); i++) {
-                
+               /* 
                if(servidorReiniciou){
                     write.println("\n" + listaReservas.get(i).getId() + "@" + listaReservas.get(i).getData() 
                     + "@" + listaReservas.get(i).getEscolhaRefeicao() + "@" + listaReservas.get(i).getNumeroDePessoas() 
@@ -58,7 +63,11 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                     + "@" + listaReservas.get(i).getEscolhaRefeicao() + "@" + listaReservas.get(i).getNumeroDePessoas() 
                     + "@" + listaReservas.get(i).getNomeDaReserva() );
                 }    
+                */
 
+                write.println(listaReservas.get(i).getId() + "@" + listaReservas.get(i).getData() 
+                + "@" + listaReservas.get(i).getEscolhaRefeicao() + "@" + listaReservas.get(i).getNumeroDePessoas() 
+                + "@" + listaReservas.get(i).getNomeDaReserva() );
             }
            
             write.close();   
@@ -111,12 +120,8 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
             
            
         }else{
-            System.out.println("tamanho array: " + listaReservas.size());
+            
             for (int i = 0; i < listaReservas.size(); i++) {
-
-                System.out.println("ENTREI NO FOR");
-    
-    
     
                 if(listaReservas.get(i).getData().equals(dataMarcacao) 
                     && listaReservas.get(i).getEscolhaRefeicao().equals(escolhaRefeicao)
@@ -286,6 +291,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
         throws RemoteException {
 
         for (int i = 0; i < listaReservas.size(); i++) {
+
             if(listaReservas.get(i).getData().equals(DataInserida)
                 && listaReservas.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)
                 && listaReservas.get(i).getNomeDaReserva().equals(nomeDaReserva)){
@@ -298,6 +304,71 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
             }
         }
         return false;
+    }
+
+
+    public void listarMesasLivre(String DataInserida) throws RemoteException {
+
+        //A FUNCAO TEM QUE SER CHAMADA AQUI, POIS CASO O USER APAGUE OU ADICIONE MAIS RESERVAS NA BASE DE DADOS
+        //ESTA NECESSITA DE ESTAR UPDATED COM OS NOVOS VALORES, MOSTRANDO ASSIM OS VALORES CORRETOS
+        guardarDadosNoTXT();
+
+        LinkedList<Integer> mesasLivresAlmoco = new LinkedList<>();
+        LinkedList<Integer> mesasLivresJantar = new LinkedList<>();
+
+        StringBuilder outputAlmoco = new StringBuilder();
+        StringBuilder outputJantar = new StringBuilder();
+
+        for (int i = 1; i < 26; i++) {
+            mesasLivresAlmoco.add(i);
+            mesasLivresJantar.add(i);
+        }
+
+        for (int i = 0; i < listaReservas.size(); i++) {
+            
+            if(listaReservas.get(i).getData().equals(DataInserida)){
+               
+                if(listaReservas.get(i).getEscolhaRefeicao().equals("A")){
+                    mesasLivresAlmoco.remove(listaReservas.get(i).getId()-1);
+                }
+
+                if(listaReservas.get(i).getEscolhaRefeicao().equals("J")){
+                    mesasLivresJantar.remove(listaReservas.get(i).getId()-1);
+                }
+            }
+        }
+
+        outputAlmoco.append("As mesas livres para Almoço no dia ").append(DataInserida).append(" são: \n");
+        for (int i = 0; i < mesasLivresAlmoco.size(); i++) {
+
+            if(i == mesasLivresAlmoco.size()-1){
+                outputAlmoco.append(mesasLivresAlmoco.get(i)).append(".\n");
+            }else{
+                outputAlmoco.append(mesasLivresAlmoco.get(i)).append(",");
+            }
+        }
+
+        outputJantar.append("As mesas livres para Jantar no dia ").append(DataInserida).append(" são: \n");
+        for (int i = 0; i < mesasLivresJantar.size(); i++) {
+
+            if(i == mesasLivresJantar.size()-1){
+                outputJantar.append(mesasLivresJantar.get(i)).append(".\n");
+            }else{
+                outputJantar.append(mesasLivresJantar.get(i)).append(",");
+            }
+        }
+
+        mensagemMesasLivresAlmoco = outputAlmoco.toString();
+        mensagemMesasLivresJantar = outputJantar.toString();
+
+    }
+
+    public String printMesasLivresAlmoco() throws RemoteException {
+        return mensagemMesasLivresAlmoco;
+    }
+
+    public String printMesasLivresJantar() throws RemoteException {
+       return mensagemMesasLivresJantar;
     }
 
 }

@@ -127,6 +127,26 @@ public class Client {
                         System.out.println("Marcação inexistente OU Dados inseridos incorretos");
                     }
                     
+                }else if(numeroInput == 3){
+                    
+                    System.out.println("Proceda à visualização de mesas disponiveis...\n");
+                    
+
+                    input = new Scanner(System.in);
+                    String data = "";
+                    do {
+                        System.out.println("\nIntroduza a data na qual deseja desmarcar a reserva, do seguinte modo: DD/MM/YY\n");
+                        input = new Scanner(System.in);
+                        data = input.nextLine();
+                    } while (!validaData(data));
+
+                    //PREPARA MENSAGEM DE OUTPUT
+                    ServerIntf.listarMesasLivre(data);
+                    
+                    //ESCRITA DA MENSAGEM
+                    System.out.println("\n" + ServerIntf.printMesasLivresAlmoco() + "\n" ); 
+                    System.out.println("\n" + ServerIntf.printMesasLivresJantar() + "\n" ); 
+
                 }
                 
             } while ( (numeroInput!=1) || (numeroInput!=2) || (numeroInput!=3) );
