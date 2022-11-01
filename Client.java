@@ -14,7 +14,6 @@ public class Client {
         System.out.println("1 - Reservar mesa");
         System.out.println("2 - Cancelar mesa");
         System.out.println("3 - Listar mesas");
-        System.out.println("4 - Registar Utilizador");
         System.out.println("QualquerTecla - Sair");
         System.out.println("=================================================\n\n");
 
@@ -120,10 +119,17 @@ public class Client {
                         nomeDaReserva = input.nextLine();
                     } while (!validaNomePessoas(nomeDaReserva));                    
                     
-                    ServerIntf.cancelarMesa(data, escolhaMarcacao,nomeDaReserva);
+                    //CORRE O CANCELAMENTO DA RESERVA E INDICA AO UTILIZADOR SE FOI BEM SUCEDIDA OU NAO
+                    if( ServerIntf.cancelarMesa(data, escolhaMarcacao,nomeDaReserva) ){
+                        System.out.println("Cancelamento de reserva COM SUCESSO");
+                    }else{
+                        System.out.println("Cancelamento de reserva SEM SUCESSO\n");
+                        System.out.println("Marcação inexistente OU Dados inseridos incorretos");
+                    }
+                    
                 }
                 
-            } while ((numeroInput!=1) || (numeroInput!=2) || (numeroInput!=3) || (numeroInput!=4));
+            } while ( (numeroInput!=1) || (numeroInput!=2) || (numeroInput!=3) );
 
             input.close();
         }catch(Exception e) {

@@ -84,9 +84,30 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
         
 
         //GUARDA DADOS NA BASE DE DADOS (Ficheiro TXT)
+
+        //SE A BASE DE DADOS TIVER VAZIA
         if(listaReservas.size() == 0){
-            Reservas dadosRecebidosAlmoco = new Reservas(1,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
-            listaReservas.add(dadosRecebidosAlmoco);
+
+            if(numeroDePessoas == 2){
+                Reservas dadosRecebidosAlmoco = new Reservas(1,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
+                listaReservas.add(dadosRecebidosAlmoco);
+            }
+
+            if(numeroDePessoas == 4){
+                Reservas dadosRecebidosAlmoco = new Reservas(11,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
+                listaReservas.add(dadosRecebidosAlmoco);
+            }
+
+            if(numeroDePessoas == 8){
+                Reservas dadosRecebidosAlmoco = new Reservas(16,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
+                listaReservas.add(dadosRecebidosAlmoco);
+            }
+
+            if(numeroDePessoas == 12){
+                Reservas dadosRecebidosAlmoco = new Reservas(21,dataMarcacao, escolhaRefeicao, numeroDePessoas,nomeDaReserva);
+                listaReservas.add(dadosRecebidosAlmoco);
+            }
+
             
            
         }else{
@@ -261,7 +282,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
     }
 
         
-    public void cancelarMesa(String DataInserida, String jantarOUalmocoInserido, String nomeDaReserva) 
+    public boolean cancelarMesa(String DataInserida, String jantarOUalmocoInserido, String nomeDaReserva) 
         throws RemoteException {
 
         for (int i = 0; i < listaReservas.size(); i++) {
@@ -270,9 +291,13 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                 && listaReservas.get(i).getNomeDaReserva().equals(nomeDaReserva)){
 
                 listaReservas.remove(i);
-                guardarDadosNoTXT();        
+               
+                guardarDadosNoTXT();    
+               
+                return true;    
             }
         }
+        return false;
     }
 
 }
