@@ -31,7 +31,7 @@ public class Client {
                 Scanner inputLogin;
 
                 do {
-                    
+
                     menuLogin();
 
                     inputLogin = new Scanner(System.in);
@@ -56,9 +56,9 @@ public class Client {
 
                         } while (jaExisteUtilizador(email1));
 
-                        String passwordDecryptada = MD5Encryption(password1);
+                        String passwordEncrypted = SHA512encryption(password1);
                         
-                        utilizadores user = new utilizadores(email1, passwordDecryptada);
+                        utilizadores user = new utilizadores(email1, passwordEncrypted);
                         ListUtilizadores.add(user);
     
                         guardarUserNoTXT();
@@ -379,7 +379,7 @@ public class Client {
        
         for (int i = 0; i < ListUtilizadores.size(); i++) {
             //String passwordDecryptada = EncryptDecrypt(passwordInput.toCharArray());
-            String passwordDecryptada = MD5Encryption(passwordInput);
+            String passwordDecryptada = SHA512encryption(passwordInput);
             
             if(ListUtilizadores.get(i).getEmail().equals(emailInput) 
                 && ListUtilizadores.get(i).getPassword().equals(passwordDecryptada)){
@@ -444,13 +444,13 @@ public class Client {
     }
 
 
-    public static String MD5Encryption(String password){
+    public static String SHA512encryption(String password){
 
         String encryptedpassword = null;
         try
         {
 
-            MessageDigest m = MessageDigest.getInstance("MD5");
+            MessageDigest m = MessageDigest.getInstance("SHA-512");
 
             m.update(password.getBytes());
 
