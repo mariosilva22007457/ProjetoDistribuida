@@ -290,14 +290,30 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
     public boolean cancelarMesa(String DataInserida, String jantarOUalmocoInserido, String nomeDaReserva) 
         throws RemoteException {
 
-        for (int i = 0; i < listaReservas.size(); i++) {
+        
 
+        for (int i = 0; i < listaReservas.size(); i++) {
+            
             if(listaReservas.get(i).getData().equals(DataInserida)
                 && listaReservas.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)
                 && listaReservas.get(i).getNomeDaReserva().equals(nomeDaReserva)){
+                
+                int val=i;
+                if(listaReservas.get(i).getId()==1){
+                    val = 1;
+                }
+
+                //ARRANJAR IDS CASO APAGUE UM ID INTERMEDIO
+                for (int k = val; k < listaReservas.size(); k++) {
+                    
+                    if(listaReservas.get(k).getEscolhaRefeicao().equals(jantarOUalmocoInserido)){
+                        listaReservas.get(k).setId(listaReservas.get(k).getId()-1); 
+                    }
+                      
+                }
 
                 listaReservas.remove(i);
-               
+
                 guardarDadosNoTXT();    
                
                 return true;    
@@ -329,11 +345,13 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
             if(listaReservas.get(i).getData().equals(DataInserida)){
                
                 if(listaReservas.get(i).getEscolhaRefeicao().equals("A")){
-                    mesasLivresAlmoco.remove(listaReservas.get(i).getId()-1);
+                    //listaReservas.get(i).getId()-1
+                    mesasLivresAlmoco.remove(Integer.valueOf(listaReservas.get(i).getId()));
                 }
 
                 if(listaReservas.get(i).getEscolhaRefeicao().equals("J")){
-                    mesasLivresJantar.remove(listaReservas.get(i).getId()-1);
+                    //listaReservas.get(i).getId()-1
+                    mesasLivresJantar.remove(Integer.valueOf(listaReservas.get(i).getId()));
                 }
             }
         }

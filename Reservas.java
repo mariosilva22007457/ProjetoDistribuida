@@ -43,5 +43,7 @@ public class Reservas {
         return nomeDaReserva;
     }
 
-    
+    public void setId(int id) {
+        this.id = id;
+    }
 }
