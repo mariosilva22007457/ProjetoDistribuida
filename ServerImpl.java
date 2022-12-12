@@ -298,7 +298,7 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                 && listaReservas.get(i).getEscolhaRefeicao().equals(jantarOUalmocoInserido)
                 && listaReservas.get(i).getNomeDaReserva().equals(nomeDaReserva)){
                 
-                int val=i;
+                int val=0;
                 if(listaReservas.get(i).getId()==1){
                     val = 1;
                 }
@@ -306,8 +306,10 @@ public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
                 //ARRANJAR IDS CASO APAGUE UM ID INTERMEDIO
                 for (int k = val; k < listaReservas.size(); k++) {
                     
-                    if(listaReservas.get(k).getEscolhaRefeicao().equals(jantarOUalmocoInserido)){
-                        listaReservas.get(k).setId(listaReservas.get(k).getId()-1); 
+                    if(listaReservas.get(k).getData().equals(DataInserida)
+                        && listaReservas.get(k).getEscolhaRefeicao().equals(jantarOUalmocoInserido)){
+                      
+                      listaReservas.get(k).setId(listaReservas.get(k).getId()-1); 
                     }
                       
                 }
